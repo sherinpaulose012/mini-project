@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Ubuntu Mono', monospace;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #1e1e1e;
+            color: white;
+            text-align: center;
+        }
+
+        header {
+            background: linear-gradient(90deg, #2d892d, #1e1e1e);
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        nav {
+            background-color: #2d892d;
+            padding: 15px 0;
+            text-align: center;
+        }
+
+        #navcontent {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        #navcontent li {
+            display: inline;
+            margin: 0 20px;
+        }
+
+        #navcontent a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.3rem;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        #navcontent a:hover {
+            color: #ffcc00;
+            text-decoration: underline;
+        }
+
+        figure {
+            margin: 20px 0;
+        }
+
+        figure img {
+            width: 90%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+        }
+
+        h2 {
+            color: #ffcc00;
+            font-size: 2.2rem;
+            font-style: italic;
+        }
+
+        h3 {
+            color: white;
+            font-size: 1.85rem;
+        }
+
+        p {
+            color: white;
+            font-size: 1.3rem;
+            width: 80%;
+            margin: auto;
+            line-height: 1.6;
+        }
+
+        marquee {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ffcc00;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-left: 20px;
+        }
+
+        .spacer {
+            height: 100px;
+        }
+    </style>
+    <title>Food Menu</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqR0gdQMmtaJkSt0gwJPI7AkDLJyfWzMg",
+            authDomain: "restuarant-menu-ed391.firebaseapp.com",
+            projectId: "restuarant-menu-ed391",
+            storageBucket: "restuarant-menu-ed391.firebasestorage.app",
+            messagingSenderId: "207904489753",
+            appId: "1:207904489753:web:d622a6280c23de8c910588",
+            measurementId: "G-7L1QY77Z57"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+    </script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <img src="https://tse2.mm.bing.net/th?id=OIP.lzZwqjHQIp_J4UC_h845HgHaG9&pid=Api&P=0&h=180.jpg" alt="Logo">
+            <marquee behavior="scroll" direction="left">WELCOME TO RESTOHUB! FRESH FLAVOURS, FRESH BEGINNINGS. JOIN US!</marquee>
+        </div>
+    </header>
+    <nav>
+        <ul id="navcontent">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="menu.html">Menu</a></li>
+            <li><a href="admin.html">Admin</a></li>
+            <li><a href="feedback.html">Feedback</a></li>
+        </ul>
+    </nav>
+    <figure>
+        <img src="https://thumbs.dreamstime.com/b/food-concept-wide-various-beef-meals-single-banner-photo-collage-274487759.jpg" alt="Delicious food menu background" />
+    </figure>
+    <h2>Serving Happiness On Every Plate.</h2>
+    <h3>Our Story:</h3>
+    <p>At Resto Hub, we believe that good food brings people together. What started as a simple passion for delicious
+        flavors has blossomed into a journey of creating unforgettable dining experiences. Each dish on our menu is
+        crafted with love, using fresh ingredients and authentic recipes that celebrate the joy of eating. Whether
+        you're here for a hearty meal or a light bite, we invite you to savor every flavor and create new memories with us.
+    </p>
+    <div class="spacer"></div>
+</body>
+
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <style>
+        body {
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+            background-color: #2e2d2d;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #2d892d;
+            padding: 20px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        #navcontent {
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        #navcontent li {
+            display: inline;
+            margin-right: 50px;
+        }
+
+        #navcontent a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.3rem;
+        }
+
+        #navcontent a:hover {
+            text-decoration: underline;
+        }
+
+        .card {
+            text-align: center;
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: green;
+            color: white;
+            margin: 10px;
+        }
+
+        .orders {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .order-item {
+            background: #444;
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            width: 300px;
+            margin: 10px;
+            text-align: left;
+        }
+
+        .fulfilled {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .fulfilled:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (!localStorage.getItem("isAdmin")) {
+            window.location.href = "adminlogin.html";
+        }
+
+        function navigateToAddDrinks() {
+            window.location.href = "manageDrinks.html";
+        }
+
+        function navigateToAddFood() {
+            window.location.href = "addfud.html";
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqR0gdQMmtaJkSt0gwJPI7AkDLJyfWzMg",
+            authDomain: "restuarant-menu-ed391.firebaseapp.com",
+            projectId: "restuarant-menu-ed391",
+            storageBucket: "restuarant-menu-ed391.firebasestorage.app",
+            messagingSenderId: "207904489753",
+            appId: "1:207904489753:web:d622a6280c23de8c910588",
+            measurementId: "G-7L1QY77Z57"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function fetchMenuItems() {
+            const ordersContainer = document.getElementById("orders");
+            ordersContainer.innerHTML = "";
+
+            const q = query(collection(db, "orders"), where("fulfilled", "==", false));
+            const querySnapshot = await getDocs(q);
+
+            querySnapshot.forEach(docSnapshot => {
+                const data = { id: docSnapshot.id, ...docSnapshot.data() };
+
+                const orderItem = document.createElement("div");
+                orderItem.classList.add("order-item");
+                orderItem.innerHTML = `
+                    <p><strong>Customer Name:</strong> ${data.customerName}</p>
+                    <p><strong>Table Number:</strong> ${data.tableNumber}</p>
+                    <h3>Ordered Items</h3>
+                    <ul class="bill-items">
+                        ${data.cart.map(item => `<li>${item.name} - Rs.${item.total.toFixed(2)} (${item.quantity} x Rs.${item.price}) [${item.orderType}]</li>`).join("")}
+                    </ul>
+                    <p class="total-amount"><strong>Total:</strong> Rs.${data.totalAmount}</p>
+                    <button class="fulfilled" data-id="${data.id}">Mark as Fulfilled</button>
+                `;
+
+                ordersContainer.appendChild(orderItem);
+            });
+
+            document.querySelectorAll('.fulfilled').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const orderId = button.getAttribute('data-id');
+                    await updateOrderStatus(orderId);
+                });
+            });
+        }
+
+        async function updateOrderStatus(orderId) {
+            try {
+                const orderRef = doc(db, "orders", orderId);
+                await updateDoc(orderRef, { fulfilled: true });
+                alert("Order marked as fulfilled!");
+                fetchMenuItems(); // Refresh the list
+            } catch (error) {
+                console.error("Error updating order: ", error);
+            }
+        }
+
+        fetchMenuItems();
+    </script>
+
+    <nav>
+        <ul id="navcontent">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="menu.html">Menu</a></li>
+            <li><a href="admin.html">Admin</a></li>
+            <li><a href="feedback.html">Feedback</a></li>
+        </ul>
+    </nav>
+
+    <div style="padding-top: 50px; display: flex; justify-content: center;">
+        <div id="addDishes" class="card" onclick="navigateToAddFood()">
+            <h2>Manage Dishes</h2>
+        </div>
+        <div id="addDrinks" class="card" onclick="navigateToAddDrinks()">
+            <h2>Manage Drinks</h2>
+        </div>
+    </div>
+
+    <h2 style="color: white;">Pending Orders</h2>
+    <div class="orders" id="orders"></div>
+</body>
+
+</html>

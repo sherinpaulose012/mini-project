@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Feedback</title>
+  <style>
+    body {
+    font-family: 'Arial', sans-serif;
+      background-color:  #2e2d2d;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    nav {
+            background-color:  #2d892d;
+            padding: 20px 0;
+        }
+
+        #navcontent {
+            text-align: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        #navcontent li {
+            display: inline;
+            margin-right: 50px;
+        }
+
+        #navcontent a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.3rem;
+        }
+
+        #navcontent a:hover {
+            text-decoration:underline;
+        }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .feedback-item {
+      border-bottom: 1px solid #ddd;
+      padding: 10px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <ul id="navcontent">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="admin.html">Admin</a></li>
+        <li><a href="feedback.html">Feedback</a></li>
+    </ul>
+  </nav>
+  <div class="container">
+    <h1>Admin Feedback Page</h1>
+    <div id="feedbackContainer"></div>
+  </div>
+
+  <script>
+    
+      // Retrieve stored feedbacks
+      const feedbacks = JSON.parse(localStorage.getItem("feedbacks")) || [];
+
+      const feedbackContainer = document.getElementById("feedbackContainer");
+
+      if (feedbacks.length === 0) {
+        feedbackContainer.innerHTML = "<p>No feedback available.</p>";
+      } else {
+        feedbacks.forEach((feedback, index) => {
+          const feedbackDiv = document.createElement("div");
+          feedbackDiv.classList.add("feedback-item");
+          feedbackDiv.innerHTML = `
+            <p><strong>Name:</strong> ${feedback.name}</p>
+            <p><strong>Email:</strong> ${feedback.email}</p>
+            <p><strong>Rating:</strong> ${feedback.rating}</p>
+            <p><strong>Comments:</strong> ${feedback.comments}</p>
+            <hr>
+          `;
+          feedbackContainer.appendChild(feedbackDiv);
+        });
+      }
+    
+  </script>
+
+</body>
+</html>

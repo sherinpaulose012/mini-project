@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Add Food Item</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px gray;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        input[type="file"] {
+            border: none;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Add Food Item</h2>
+        <form id="foodForm">
+            <input type="text" id="foodName" placeholder="Enter Food Name" required>
+            <input type="number" id="foodPrice" placeholder="Enter Amount" required>
+            <input type="file" id="foodImage" accept="image/*" required>
+            <button type="submit">Add Food</button>
+        </form>
+
+        <h3>Food List</h3>
+        <ul id="foodList"></ul>
+    </div>
+
+    <script>
+        document.getElementById("foodForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let foodName = document.getElementById("foodName").value;
+            let foodPrice = document.getElementById("foodPrice").value;
+            let foodImage = document.getElementById("foodImage").files[0];
+
+            if (foodName && foodPrice && foodImage) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let foodList = document.getElementById("foodList");
+                    let listItem = document.createElement("li");
+                    listItem.innerHTML = `<strong>${foodName} - $${foodPrice}</strong> <br>
+                                          <img src="${e.target.result}" width="100">`;
+                    foodList.appendChild(listItem);
+                };
+                reader.readAsDataURL(foodImage);
+            }
+        });
+    </script>
+
+</body>
+</html>

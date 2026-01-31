@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Add Food Item</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 50%;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px gray;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        input[type="file"] {
+            border: none;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .food-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .food-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #fff;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0px 0px 5px lightgray;
+        }
+        .food-item img {
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+            margin-right: 15px;
+        }
+        .food-details {
+            flex: 1;
+        }
+        .delete-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .delete-btn:hover {
+            background: darkred;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Add Food Item</h2>
+        <form id="foodForm">
+            <input type="text" id="foodName" placeholder="Enter Food Name" required>
+            <input type="number" id="foodPrice" placeholder="Enter Amount" required>
+            <input type="file" id="foodImage" accept="image/*" required>
+            <button type="submit">Add Food</button>
+        </form>
+
+        <h3>Food List</h3>
+        <div id="foodList" class="food-list"></div>
+    </div>
+
+    <script>
+        document.getElementById("foodForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let foodName = document.getElementById("foodName").value;
+            let foodPrice = document.getElementById("foodPrice").value;
+            let foodImage = document.getElementById("foodImage").files[0];
+
+            if (foodName && foodPrice && foodImage) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let foodList = document.getElementById("foodList");
+
+                    let listItem = document.createElement("div");
+                    listItem.classList.add("food-item");
+
+                    listItem.innerHTML = `
+                        <img src="${e.target.result}" alt="Food Image">
+                        <div class="food-details">
+                            <strong>${foodName}</strong> - $${foodPrice}
+                        </div>
+                        <button class="delete-btn">Delete</button>
+                    `;
+
+                    foodList.appendChild(listItem);
+
+                    // Delete button functionality
+                    listItem.querySelector(".delete-btn").addEventListener("click", function() {
+                        foodList.removeChild(listItem);
+                    });
+
+                    // Clear form fields
+                    document.getElementById("foodForm").reset();
+                };
+                reader.readAsDataURL(foodImage);
+            }
+        });
+    </script>
+
+</body>
+</html>

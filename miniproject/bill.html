@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Summary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .bill-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #e7881b;
+        }
+
+        .bill-items {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .total-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script type="module">
+        // Function to go home and clear storage
+        function goHome() {
+            localStorage.removeItem("customerName");
+            localStorage.removeItem("tableNumber");
+            localStorage.removeItem("cartItems");
+            localStorage.removeItem("totalAmount");
+            window.location.href = "index.html";
+        }
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+        } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqR0gdQMmtaJkSt0gwJPI7AkDLJyfWzMg",
+            authDomain: "restuarant-menu-ed391.firebaseapp.com",
+            projectId: "restuarant-menu-ed391",
+            storageBucket: "restuarant-menu-ed391.firebasestorage.app",
+            messagingSenderId: "207904489753",
+            appId: "1:207904489753:web:d622a6280c23de8c910588",
+            measurementId: "G-7L1QY77Z57",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        // Retrieve stored details
+        const name = localStorage.getItem("customerName") || "Unknown";
+        const tableNumber = localStorage.getItem("tableNumber") || "N/A";
+        const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+        const totalAmount = localStorage.getItem("totalAmount") || "0.00";
+
+        // Display customer details
+        document.getElementById("displayName").textContent = name;
+        document.getElementById("displayTable").textContent = tableNumber;
+
+        // Display cart items
+        const billItemsList = document.querySelector(".bill-items");
+        cartItems.forEach(item => {
+            const listItem = document.createElement("li");
+            listItem.textContent = `${item.name} - Rs.${item.total.toFixed(2)} (${item.quantity} x Rs.${item.price}) [${item.orderType}]`;
+            billItemsList.appendChild(listItem);
+        });
+
+        // Display total amount
+        document.querySelector(".total-amount").textContent = `Total Amount: Rs.${totalAmount}`;
+
+        await addDoc(collection(db, "orders"), {
+            customerName: name,
+            tableNumber,
+            cart: cartItems,
+            totalAmount,
+            fulfilled: false
+        });
+
+        alert("Order placed successfully!");
+    </script>
+</head>
+
+<body>
+
+    <script>
+        // Function to go home and clear storage
+        function goHome() {
+            localStorage.removeItem("customerName");
+            localStorage.removeItem("tableNumber");
+            localStorage.removeItem("cartItems");
+            localStorage.removeItem("totalAmount");
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <div class="bill-container">
+        <h2>Bill Summary</h2>
+        <p><strong>Customer Name:</strong> <span id="displayName"></span></p>
+        <p><strong>Table Number:</strong> <span id="displayTable"></span></p>
+        <h3>Ordered Items</h3>
+        <ul class="bill-items"></ul>
+        <p class="total-amount"></p>
+        <button onclick="goHome()">Go to Home</button>
+    </div>
+
+</body>
+
+</html>

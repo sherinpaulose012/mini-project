@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Menu with Add to Cart</title>
+
+  <link rel="stylesheet" href="index.css" />
+  <script type="module" async>
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqR0gdQMmtaJkSt0gwJPI7AkDLJyfWzMg",
+      authDomain: "restuarant-menu-ed391.firebaseapp.com",
+      projectId: "restuarant-menu-ed391",
+      storageBucket: "restuarant-menu-ed391.firebasestorage.app",
+      messagingSenderId: "207904489753",
+      appId: "1:207904489753:web:d622a6280c23de8c910588",
+      measurementId: "G-7L1QY77Z57"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+
+
+    // Initialize Cloud Firestore and get a reference to the service
+    const db = getFirestore(app);
+
+
+    async function fetchMenuItems() {
+      const querySnapshot = await getDocs(collection(db, "dishes"));
+      const menuContainer = document.getElementById("menu-container");
+      menuContainer.innerHTML = "";
+
+      querySnapshot.forEach(doc => {
+        const data = { id: doc.id, ...doc.data() };
+
+        // Create menu item
+        const menuItem = document.createElement("div");
+        menuItem.classList.add("menu-item");
+        menuItem.innerHTML = `
+          <img src="${data.imageUrl}" alt="${data.name}">
+          <h2>${data.name}</h2>
+          <p class="price">Rs.${data.price}</p>
+          <p class="description">${data.description}</p>
+          <p class="availability" style="color: ${data.availability ? 'green' : 'red'}; font-weight: bold;">
+            ${data.availability ? "Available" : "Not Available"}
+          </p>
+          <label for="quantity">Quantity:</label>
+          <input type="number" class="quantity" id="quantity" min="1" value="1">
+          <br><br>
+          <div class="order-type">
+            <input type="checkbox" name="${data.id}" id="takeaway" value="Take Away">
+            <label for="takeaway">Take Away</label>
+            <input type="checkbox" name="${data.id}" id="dinein" checked value="Dine In">
+            <label for="dinein">Dine In</label>
+          </div>
+          <button class="add-to-cart" data-name="${data.id}" data-price="${data.price}">Add to Cart</button>
+        `;
+
+        menuContainer.appendChild(menuItem);
+      });
+
+      // Add event listeners for Add to Cart buttons
+      document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', () => {
+          const itemName = button.getAttribute('data-name');
+          const itemPrice = parseFloat(button.getAttribute('data-price'));
+          const itemQuantity = button.parentElement.querySelector('.quantity').value; // Get the selected quantity
+
+          // Determine selected order type
+          const takeawayCheckbox = button.parentElement.querySelector(`#takeaway`);
+          const dineinCheckbox = button.parentElement.querySelector(`#dinein`);
+
+          let orderType = "Not Selected"; // Default value
+          if (takeawayCheckbox.checked) {
+            orderType = "Take Away";
+          } else if (dineinCheckbox.checked) {
+            orderType = "Dine In";
+          }
+
+          // Calculate the total price for this item
+          const totalItemPrice = itemPrice * itemQuantity;
+
+          // Add item with quantity, order type, and total price to the cart
+          cartItems.push({ name: itemName, price: itemPrice, quantity: itemQuantity, total: totalItemPrice, orderType });
+          updateCart();
+        });
+      });
+    }
+
+    fetchMenuItems();
+
+
+    const cartItems = [];
+    const cartItemsList = document.querySelector('.cart-items');
+    const totalDisplay = document.querySelector('.total');
+
+
+
+    function updateCart() {
+      cartItemsList.innerHTML = '';
+      let total = 0;
+
+      // Loop through cart items
+      cartItems.forEach((item, index) => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `${item.name} - Rs.${item.total.toFixed(2)} (${item.quantity} x Rs.${item.price}) 
+                              [${item.orderType}]
+                              <button class="remove-item" data-index="${index}">Remove</button>`; // Include order type
+
+        cartItemsList.appendChild(listItem);
+        total += item.total;
+      });
+
+      totalDisplay.textContent = "Total: Rs." + total.toFixed(2);
+    }
+
+    // Event listener for removing items from the cart
+    cartItemsList.addEventListener('click', (e) => {
+      if (e.target && e.target.classList.contains('remove-item')) {
+        const index = e.target.getAttribute('data-index');
+        cartItems.splice(index, 1); // Remove item from the cart array
+        updateCart();
+      }
+    });
+
+    // Event listener for submitting the cart
+    document.querySelector('.submit-btn').addEventListener('click', () => {
+      // Store cart details in localStorage
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+
+      // Calculate total
+      const totalAmount = cartItems.reduce((sum, item) => sum + item.total, 0);
+      localStorage.setItem("totalAmount", totalAmount.toFixed(2));
+
+      // Proceed to Bill page
+      window.location.href = "customer.html";
+    });
+
+
+
+
+
+  </script>
+</head>
+
+<body>
+
+  <nav>
+    <ul id="navcontent">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
+    </ul>
+  </nav>
+
+  <h1>___OUR MAIN DISHES___ </h1>
+  <div class="menu-container" id="menu-container">
+  </div>
+
+  <h1>___OUR SPECIAL DRINKS___</h1>
+  <div class="menu-container">
+    <div class="menu-item">
+      <img src="https://tse1.mm.bing.net/th?id=OIP.dQOP_GliqHPUGFlqXnGHJwHaEo&pid=Api&P=0&h=180" alt="Tea">
+      <h2>Hot Tea</h2>
+      <p class="price">Rs.50</p>
+      <p class="description">Freshly brewed hot tea with a soothing aroma.</p>
+      <p class="availability" id="Hot Tea-availability" style="color: green; font-weight: bold;">
+        Available
+      </p>
+      <label for="quantity">Quantity:</label>
+      <input type="number" class="quantity" id="quantity" min="1" value="1"><br><br>
+      <div class="order-type">
+        <input type="radio" name="1" id="takeaway" value="Take Away">
+        <label for="takeaway">Take Away</label>
+        <input type="radio" name="1" id="dinein" checked value="Dine In">
+        <label for="dinein">Dine In</label>
+      </div>
+      <button class="add-to-cart" data-name="Hot Tea" data-price="50">Add to Cart</button>
+    </div>
+
+    <div class="menu-item">
+      <img src="https://tse1.mm.bing.net/th?id=OIP.BSP4bZJ0kWXLzrBgU_L0IQHaE8&pid=Api&P=0&h=180" alt="Coffee">
+      <h2>Hot Coffee</h2>
+      <p class="price">Rs.80</p>
+      <p class="description">Freshly brewed hot coffee.</p>
+      <p class="availability" id="Hot Coffee-availability" style="color: green; font-weight: bold;">
+        Available
+      </p>
+      <label for="quantity">Quantity:</label>
+      <input type="number" class="quantity" id="quantity" min="1" value="1"><br><br>
+      <div class="order-type">
+        <input type="radio" name="2" id="takeaway" value="Take Away">
+        <label for="takeaway">Take Away</label>
+        <input type="radio" name="2" id="dinein" checked value="Dine In">
+        <label for="dinein">Dine In</label>
+      </div>
+      <button class="add-to-cart" data-name="Hot Coffee" data-price="60">Add to Cart</button>
+    </div>
+
+    <div class="menu-item">
+      <img src="https://tse2.mm.bing.net/th?id=OIP.IR6-nGiXnuM5VreqzetbzQHaE8&pid=Api&P=0&h=180" alt="Mint Mojito">
+      <h2>Mint Mojito</h2>
+      <p class="price">Rs.120</p>
+      <p class="description">Refreshing mint mojito with lime and soda.</p>
+      <p class="availability" id="Mint Mojito-availability" style="color: green; font-weight: bold;">
+        Available
+      </p>
+      <label for="quantity">Quantity:</label>
+      <input type="number" class="quantity" id="quantity" min="1" value="1"><br><br>
+      <div class="order-type">
+        <input type="radio" name="3" id="takeaway" value="Take Away">
+        <label for="takeaway">Take Away</label>
+        <input type="radio" name="3" id="dinein" checked value="Dine In">
+        <label for="dinein">Dine In</label>
+      </div>
+      <button class="add-to-cart" data-name="Mint Mojito" data-price="110">Add to Cart</button>
+    </div>
+
+
+    <div class="menu-item">
+      <img src="https://tse3.mm.bing.net/th?id=OIP.ALGo7gtTc3UH7Rd8kY-6EAHaFW&pid=Api&P=0&h=180"
+        alt="Chocolate Milkshake">
+      <h2>Chocolate Milkshake</h2>
+      <p class="price">Rs.150</p>
+      <p class="description">Thick and chocolaty goodness topped with whipped cream.</p>
+      <p class="availability" id="Chocolate Milkshake-availability" style="color: green; font-weight: bold;">
+        Available
+      </p>
+      <label for="quantity">Quantity:</label>
+      <input type="number" class="quantity" id="quantity" min="1" value="1"><br><br>
+      <div class="order-type">
+        <input type="radio" name="4" id="takeaway" value="Take Away">
+        <label for="takeaway">Take Away</label>
+        <input type="radio" name="4" id="dinein" checked value="Dine In">
+        <label for="dinein">Dine In</label>
+      </div>
+      <button class="add-to-cart" data-name="Chocolate Milkshake" data-price="130">Add to Cart</button>
+    </div>
+
+
+    <div class="menu-item">
+      <img src="https://tse4.mm.bing.net/th?id=OIP.KZMHTvtUBU7t0pXEiLivbAHaE8&pid=Api&P=0&h=180" alt="Lemonade">
+      <h2>Classic Lemonade</h2>
+      <p class="price">Rs.110</p>
+      <p class="description">Cool and zesty lemonade with a hint of mint.</p>
+      <p class="availability" id="lemonade-availability" style="color: green; font-weight: bold;">
+        Available
+      </p>
+      <label for="quantity">Quantity:</label>
+      <input type="number" class="quantity" id="quantity" min="1" value="1"><br><br>
+      <div class="order-type">
+        <input type="radio" name="5" id="takeaway" value="Take Away">
+        <label for="takeaway">Take Away</label>
+        <input type="radio" name="5" id="dinein" checked value="Dine In">
+        <label for="dinein">Dine In</label>
+      </div>
+      <button class="add-to-cart" data-name="Classic Lemonade" data-price="90">Add to Cart</button>
+    </div>
+
+
+    <div class="menu-item">
+      <img src="https://tse1.mm.bing.net/th?id=OIP.x7dOBSozGiiyytohhpbCJgHaE8&pid=Api&P=0&h=180"
+        alt="Strawberry Smoothie">
+      <h2>Strawberry Smoothie</h2>
+      <p class="price">Rs.130</p>
+      <p class="description">Rich and creamy strawberry delight with real fruit.</p>
+      <p class="availability" id="Strawberry Smoothie-availability" style="color: green; font-weight: bold;">
+        Available
+      </p>
+      <label for="quantity">Quantity:</label>
+      <input type="number" class="quantity" id="quantity" min="1" value="1"><br><br>
+      <div class="order-type">
+        <input type="radio" name="6" id="takeaway" value="Take Away">
+        <label for="takeaway">Take Away</label>
+        <input type="radio" name="6" id="dinein" checked value="Dine In">
+        <label for="dinein">Dine In</label>
+      </div>
+      <button class="add-to-cart" data-name="Strawberry Smoothie" data-price="150">Add to Cart</button>
+    </div>
+  </div>
+  </div>
+
+
+
+
+
+  <!-- More menu items for drinks -->
+
+  </div>
+
+  <div class="cart">
+    <h2>Your Cart</h2>
+    <ul class="cart-items"></ul>
+    <p class="total">Total: Rs.0</p>
+    <button class="submit-btn">Proceed to Bill</button>
+  </div>
+
+
+</body>
+
+</html>

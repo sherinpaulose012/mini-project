@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color:  #2e2d2d;
+      padding: 20px;
+    }
+    h1{
+      color: #e7881b;
+      font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      text-align:center;
+    }
+    form {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(74, 73, 73, 0.1);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="email"], textarea, select {
+      width: 90%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 15px;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+
+    nav {
+            background-color:  #2d892d;
+            padding: 20px 0;
+        }
+
+        #navcontent {
+            text-align: center;
+            padding: 0;
+            margin: 0;
+        }
+        #navcontent li {
+            display: inline;
+            margin-right: 50px;
+        }
+
+        #navcontent a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.3rem;
+        }
+
+        #navcontent a:hover {
+            text-decoration:underline;
+        }
+  </style>
+<body>
+    <form onsubmit="saveFeedback(event)">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" placeholder="Enter your name" required>
+      
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+      
+        <label for="rating">How would you rate your experience?</label>
+        <select id="rating" name="rating" required>
+          <option value="excellent">Excellent</option>
+          <option value="good">Good</option>
+          <option value="average">Average</option>
+          <option value="poor">Poor</option>
+        </select>
+      
+        <label for="comments">Additional Comments:</label>
+        <textarea id="comments" name="comments" rows="4" placeholder="Share your thoughts..."></textarea>
+      
+        <button type="submit">Submit Feedback</button>
+      </form>
+      <script>
+        function saveFeedback(event) {
+          event.preventDefault(); // Prevent page refresh
+      
+          // Get user input
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("email").value;
+          const rating = document.getElementById("rating").value;
+          const comments = document.getElementById("comments").value;
+      
+          // Create feedback object
+          const feedback = {
+            name,
+            email,
+            rating,
+            comments
+          };
+      
+          // Retrieve existing feedbacks from localStorage
+          let feedbacks = JSON.parse(localStorage.getItem("feedbacks")) || [];
+      
+          // Add new feedback to the list
+          feedbacks.push(feedback);
+      
+          // Store the updated feedback list
+          localStorage.setItem("feedbacks", JSON.stringify(feedbacks));
+      
+          // Show success message
+          alert("Feedback submitted successfully! Thank you for your response.");
+      
+          // Clear form fields
+          document.getElementById("name").value = "";
+          document.getElementById("email").value = "";
+          document.getElementById("rating").value = "excellent"; // Reset dropdown
+          document.getElementById("comments").value = "";
+      
+          // Redirect user (optional)
+          window.location.href = "index.html"; 
+        }
+      </script>
+      
+</body>
+</html>
+
+
+
+
+
+
+
+

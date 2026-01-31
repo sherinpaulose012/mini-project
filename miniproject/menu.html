@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Menu with Add to Cart</title>
+
+  <link rel="stylesheet" href="index.css" />
+  <script type="module" async>
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs, updateDoc, doc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqR0gdQMmtaJkSt0gwJPI7AkDLJyfWzMg",
+      authDomain: "restuarant-menu-ed391.firebaseapp.com",
+      projectId: "restuarant-menu-ed391",
+      storageBucket: "restuarant-menu-ed391.firebasestorage.app",
+      messagingSenderId: "207904489753",
+      appId: "1:207904489753:web:d622a6280c23de8c910588",
+      measurementId: "G-7L1QY77Z57"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const cartItems = [];
+    const cartItemsList = document.querySelector('.cart-items');
+    const totalDisplay = document.querySelector('.total');
+
+    async function fetchMenuItems(collectionName) {
+      const querySnapshot = await getDocs(collection(db, collectionName));
+      const menuContainer = document.getElementById(collectionName + "-container");
+      menuContainer.innerHTML = "";
+
+      querySnapshot.forEach(docItem => {
+        const data = { id: docItem.id, ...docItem.data() };
+        const averageRating = data.ratings && data.ratings.length > 0
+          ? (data.ratings.reduce((sum, rating) => sum + rating, 0) / data.ratings.length).toFixed(1)
+          : undefined;
+
+        const menuItem = document.createElement("div");
+        menuItem.classList.add("menu-item");
+        menuItem.innerHTML = `
+          <img src="${data.imageUrl}" alt="${data.name}">
+          <h2 class="name">${data.name}</h2>
+          <p class="price">Rs.${data.price}</p>
+          <p class="description">${data.description}</p>
+          <p class="availability" style="color: ${data.availability ? 'green' : 'red'}; font-weight: bold;">
+            ${data.availability ? "Available" : "Not Available"}
+          </p>
+          <div class="ratings">
+            <p class="rating">${averageRating ? `Average Rating: <strong>${averageRating}</strong>` : "No Ratings"}</p>
+            <button class="rate-btn" data-id="${data.id}">Rate</button>  
+          </div>
+          <div class="quantity-section">
+            <label for="quantity">Quantity:</label>
+            <input type="number" class="quantity" id="quantity" min="1" value="1">
+          </div>
+          <div class="order-type">
+            <input type="checkbox" name="${data.id}" id="takeaway" value="Take Away">
+            <label for="takeaway">Take Away</label>
+            <input type="checkbox" name="${data.id}" id="dinein" checked value="Dine In">
+            <label for="dinein">Dine In</label>
+          </div>
+          <button class="add-to-cart" data-name="${data.id}" data-price="${data.price}">Add to Cart</button>
+        `;
+
+        menuItem.querySelector('.rate-btn').addEventListener('click', async (event) => {
+          const button = event.target;
+          const itemId = button.getAttribute('data-id');
+          const userRating = prompt("Rate this item (1-5 stars):");
+          const rating = parseInt(userRating);
+
+          if (!isNaN(rating) && rating >= 1 && rating <= 5) {
+            await updateDoc(doc(db, collectionName, itemId), {
+              ratings: arrayUnion(rating)
+            });
+            alert("Thank you for your rating!");
+            fetchMenuItems(collectionName);
+          } else {
+            alert("Invalid rating. Please enter a number between 1 and 5.");
+          }
+        });
+
+        menuItem.querySelector('.add-to-cart').addEventListener('click', (event) => {
+          const button = event.target;
+          const itemName = button.parentElement.querySelector('.name').innerText;
+          const itemPrice = parseFloat(button.getAttribute('data-price'));
+          const itemQuantity = button.parentElement.querySelector('.quantity').value;
+          const takeawayCheckbox = button.parentElement.querySelector('#takeaway');
+          const dineinCheckbox = button.parentElement.querySelector('#dinein');
+          let orderType = takeawayCheckbox.checked ? "Take Away" : "Dine In";
+          const totalItemPrice = itemPrice * itemQuantity;
+
+          cartItems.push({ name: itemName, price: itemPrice, quantity: itemQuantity, total: totalItemPrice, orderType });
+          updateCart();
+        });
+        menuContainer.appendChild(menuItem);
+      });
+    }
+
+    function updateCart() {
+      cartItemsList.innerHTML = '';
+      let total = 0;
+
+      cartItems.forEach((item, index) => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+        <p>${item.name} - Rs.${item.total.toFixed(2)} (${item.quantity} x Rs.${item.price}) [${item.orderType}]</p>
+        <button class="remove-item" data-index="${index}">Remove</button>`;
+        cartItemsList.appendChild(listItem);
+        total += item.total;
+      });
+      totalDisplay.textContent = "Total: Rs." + total.toFixed(2);
+    }
+
+    cartItemsList.addEventListener('click', (e) => {
+      if (e.target && e.target.classList.contains('remove-item')) {
+        const index = e.target.getAttribute('data-index');
+        cartItems.splice(index, 1);
+        updateCart();
+      }
+    });
+
+    document.querySelector('.submit-btn').addEventListener('click', () => {
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+      const totalAmount = cartItems.reduce((sum, item) => sum + item.total, 0);
+      localStorage.setItem("totalAmount", totalAmount.toFixed(2));
+      window.location.href = "customer.html";
+    });
+
+    fetchMenuItems("dishes");
+    fetchMenuItems("drinks");
+  </script>
+</head>
+
+<body>
+  <nav>
+    <ul id="navcontent">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
+    </ul>
+  </nav>
+
+  <h1 style="margin: 40px;">___OUR MAIN DISHES___ </h1>
+  <div class="dishes-container" id="dishes-container"></div>
+
+  <h1 style="margin: 40px;">___OUR SPECIAL DRINKS___</h1>
+  <div class="drinks-container" id="drinks-container"></div>
+
+  <div class="cart">
+    <h2>Your Cart</h2>
+    <ul class="cart-items"></ul>
+    <p class="total">Total: Rs.0</p>
+    <button class="submit-btn">Proceed to Bill</button>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Dishes - Admin Panel</title>
+  <link rel="stylesheet" href="index.css" />
+  <script>
+    if (!localStorage.getItem("isAdmin")) {
+      window.location.href = "adminlogin.html"
+    }
+  </script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      updateDoc,
+      doc,
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqR0gdQMmtaJkSt0gwJPI7AkDLJyfWzMg",
+      authDomain: "restuarant-menu-ed391.firebaseapp.com",
+      projectId: "restuarant-menu-ed391",
+      storageBucket: "restuarant-menu-ed391.firebasestorage.app",
+      messagingSenderId: "207904489753",
+      appId: "1:207904489753:web:d622a6280c23de8c910588",
+      measurementId: "G-7L1QY77Z57",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let editingId = null; // Store ID when editing
+
+    async function addOrUpdateDish(event) {
+      event.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const price = parseFloat(document.getElementById("price").value);
+      const description = document.getElementById("description").value;
+      const imageUrl = document.getElementById("imageUrl").value;
+      const availability = document.getElementById("availability").checked;
+
+      try {
+        if (editingId) {
+          const dishRef = doc(db, "dishes", editingId);
+          await updateDoc(dishRef, {
+            name,
+            price,
+            description,
+            imageUrl,
+            availability,
+          });
+          alert("Dish updated successfully!");
+        } else {
+          await addDoc(collection(db, "dishes"), {
+            name,
+            price,
+            description,
+            imageUrl,
+            availability,
+          });
+          alert("Dish added successfully!");
+        }
+
+        document.getElementById("dishForm").reset();
+        closePopup();
+        fetchMenuItems();
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+
+    async function fetchMenuItems() {
+      const querySnapshot = await getDocs(collection(db, "dishes"));
+      const menuContainer = document.getElementById("dishes-container");
+      menuContainer.innerHTML = "";
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const menuItem = document.createElement("div");
+        menuItem.classList.add("menu-item");
+        menuItem.innerHTML = `
+            <img src="${data.imageUrl}" alt="${data.name}" width="100">
+            <h2>${data.name}</h2>
+            <p class="price">Rs.${data.price}</p>
+            <p class="description">${data.description}</p>
+            <p class="availability" style="color: ${data.availability ? "green" : "red"
+          }; font-weight: bold;">
+              ${data.availability ? "Available" : "Not Available"}
+            </p>
+            <button onclick="openPopup('${doc.id}', '${data.name}', '${data.price
+          }', '${data.description}', '${data.imageUrl}', ${data.availability
+          })">Edit Dish</button>
+          `;
+        menuContainer.appendChild(menuItem);
+      });
+    }
+
+    function openPopup(
+      id = null,
+      name = "",
+      price = "",
+      description = "",
+      imageUrl = "",
+      availability = false
+    ) {
+      document.getElementById("popup").style.display = "block";
+      document.getElementById("overlay").style.display = "block";
+      document.getElementById("name").value = name;
+      document.getElementById("price").value = price;
+      document.getElementById("description").value = description;
+      document.getElementById("imageUrl").value = imageUrl;
+      document.getElementById("availability").checked = availability;
+      editingId = id;
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+      document.getElementById("overlay").style.display = "none";
+      document.getElementById("dishForm").reset();
+      editingId = null;
+    }
+
+    window.openPopup = openPopup;
+    window.closePopup = closePopup;
+    window.addOrUpdateDish = addOrUpdateDish;
+
+    fetchMenuItems();
+  </script>
+</head>
+
+<body>
+  <nav>
+    <ul id="navcontent">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="menu.html">Menu</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="feedback.html">Feedback</a></li>
+    </ul>
+  </nav>
+
+  <h1>Admin Panel - Dishes Availability</h1>
+  <button style="margin: 20px;" onclick="openPopup()">Add New Dish</button>
+
+  <div class="dishes-container" id="dishes-container"></div>
+
+  <div class="overlay" id="overlay" onclick="closePopup()"></div>
+  <div class="popup" id="popup">
+    <h2>Add/Edit Dish</h2>
+    <form id="dishForm" onsubmit="addOrUpdateDish(event)">
+      <label>Dish Name:</label>
+      <input type="text" id="name" required />
+
+      <label>Price (Rs):</label>
+      <input type="number" id="price" required />
+
+      <label>Description:</label>
+      <textarea id="description" required></textarea>
+
+      <label>Image URL:</label>
+      <input type="text" id="imageUrl" required />
+
+      <div class="checkbox">
+        <label>Available:</label>
+        <input type="checkbox" id="availability" />
+      </div>
+
+      <button type="submit">Save Dish</button>
+      <button type="button" onclick="closePopup()">Cancel</button>
+    </form>
+  </div>
+</body>
+
+</html>
